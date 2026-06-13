@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontend Visual QA"
+  short_description: "Check UI layout, fit, overlap, and affordance."
+  default_prompt: "Use $frontend-visual-qa to review this frontend UI change before implementation and completion."
