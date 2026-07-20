@@ -64,6 +64,16 @@ Capture the user action, expected result, visible failure, forbidden behavior, c
 - When authorized, verify the deployed revision and safe runtime path. Record limitations instead of substituting tests for a blocked live check.
 - Do not repeat broad review after documentation-only or test-only follow-ups unless risk changed.
 
+## Control Long-Running Session Cost
+
+For a written multi-task plan that uses subagents, read
+`references/long-running-session-cost.md` before dispatch. Its binding contract
+is: durable ledger and file handoffs; one implementer plus one
+controller-dispatched reviewer per task; one combined fix wave and one
+re-review; focused tests during work and one final full gate; explicit
+`model`, `reasoning_effort`, and `fork_turns`; and a self-contained handoff
+before changing sessions.
+
 ## Report Precisely
 
 ```text
