@@ -52,7 +52,7 @@ For configuration sync, preserve the canonical file, write to a non-loaded stagi
 
 Capture the user action, expected result, visible failure, forbidden behavior, compatibility needs, and external dependencies.
 
-- Test the production boundary, not only injected helpers. Prefer behavior or rendered-UI tests over source-string assertions.
+- Test the production boundary, not only injected helpers. Preserve repository, transaction, and UI side effects required by the invariant; mock external operations only. Prefer behavior or rendered-UI tests over source-string assertions.
 - Expose safe capability readiness for optional features instead of offering an action that can only fail generically.
 - Keep user errors actionable. Log non-sensitive categories and request IDs, never secrets, private provider bodies, or customer data.
 
@@ -72,7 +72,8 @@ is: durable ledger and file handoffs; one implementer plus one
 controller-dispatched reviewer per task; one combined fix wave and one
 re-review; focused tests during work and one final full gate; explicit
 `model`, `reasoning_effort`, and `fork_turns`; and a self-contained handoff
-before changing sessions.
+before changing sessions. A failed re-review triggers the reference's
+stop-and-recover gate instead of another loop.
 
 ## Report Precisely
 
