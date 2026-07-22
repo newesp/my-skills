@@ -1,11 +1,11 @@
 ---
 name: pr-readiness
-description: Use when a feature, module, or otherwise meaningful chunk of work is fully implemented and about to be handed off for human review — NOT after every small fix, one-line tweak, or intermediate push within an in-progress feature. Trigger on phrases like "這個功能做完了", "ready for review", "PR 準備好了", "before I open a PR", "before merging this feature", or when the agent itself is about to signal that a substantial piece of work is finished. Covers documentation updates, dead-code cleanup, build/lint/test verification, secrets/PII scanning, and the self-review report (including the parallel-reviewer dispatch). Applies regardless of which user or project.
+description: Use when a feature, module, or otherwise meaningful chunk of work is fully implemented and about to be handed off for human review — NOT after every small fix, one-line tweak, or intermediate push within an in-progress feature. Trigger on phrases like "這個功能做完了", "ready for review", "PR 準備好了", "before I open a PR", "before merging this feature", or when the agent itself is about to signal that a substantial piece of work is finished. Covers documentation updates, dead-code cleanup, build/lint/test verification, secrets/PII scanning, focused self-review, and an optional user-requested three-reviewer dispatch. Applies regardless of which user or project.
 ---
 
 # PR Readiness
 
-Use this skill to define the engineering quality bar a change must meet before requesting human review. This is project-agnostic: it applies whether or not `collaborate-with-me` is also in effect for this user.
+Use this skill to define the engineering quality bar a change must meet before requesting human review. This skill owns the completed-change handoff checklist; `collaborate-with-me` owns authorization, external effects, evidence, and reality-state tracking during the work.
 
 ## Scope Gate (check this first, every time)
 
@@ -13,7 +13,7 @@ This skill is for handing off a **completed feature or meaningful chunk of work*
 
 - **Run the full checklist when:** a requested feature/task is fully implemented and about to be handed to a human, a multi-file meaningful change is ready to be handed off for human review, or the user explicitly signals completion ("ready for review", "這個功能做完了").
 - **Skip this skill entirely when:** the change is a typo fix, one-line tweak, or an intermediate commit/push that's part of a still-in-progress feature. Commit/push normally — running local build/lint is still fine practice, but do not dispatch parallel reviewers (step 7) for this.
-- **If unsure which bucket a change falls into:** ask once rather than guessing. Running the full checklist unnecessarily costs real time/resources (3 parallel reviewer dispatches); skipping it when it was actually needed costs correctness. When genuinely ambiguous, default to asking, not to running the full dispatch automatically.
+- **If unsure which bucket a change falls into:** ask once rather than guessing. Skipping the checklist when it is needed costs correctness. Do not infer a request for parallel reviewers from scope or risk; dispatch them only when the user explicitly requests a three-reviewer review.
 
 ## Documentation Standard
 
@@ -44,7 +44,7 @@ Add when purpose, parameters, return value, side effects, or failure modes are N
 6. Scan the diff for secrets, PII, and customer-identifiable data. If found, stop and remove/rotate before proceeding — do not merely note it.
 
 **Review**
-7. Run a self-review workflow. If Superpowers is available, use the `requesting-code-review` skill for the review workflow, then use available agent tooling to dispatch three parallel reviewers for (1) correctness & logic, (2) security & performance, (3) maintainability + naming + file locations. Fix all Critical and Important findings, then run one confirmation review pass. Re-dispatch only if that pass finds new Critical or Important findings, or after material follow-up changes. If Superpowers is not available, perform the same three review passes manually or with the available agent tooling.
+7. Run a focused self-review of the completed diff. Only when the user explicitly requests a three-reviewer review, dispatch three parallel reviewers for (1) correctness and logic, (2) security and performance, and (3) maintainability, naming, and file locations. Fix all Critical and Important findings from the reviews performed, then run one focused confirmation pass. Do not dispatch or re-dispatch subagents unless the user explicitly requested the three-reviewer review for this handoff.
 
 **Finalize**
 8. If this is your own PR branch, squash noisy iteration commits into meaningful commits before handoff. Force-push only to your fork/branch, never upstream/shared branches.
@@ -57,7 +57,7 @@ Add when purpose, parameters, return value, side effects, or failure modes are N
 Some steps may be skipped for low-risk changes, but the skip itself must be stated in the report — never silently omitted.
 
 - **Docs-only / comment-only PR** (no code logic changed): skip build/lint/test *execution* only if CI would trivially pass; still run lint on the touched files.
-- **Hotfix under explicit time pressure** (approved by a human): may skip the full parallel review dispatch (step 7) and do a single fast pass on correctness + security only. Full review still required in a fast-follow PR — state this in the report.
+- **Hotfix under explicit time pressure** (approved by a human): use a single fast correctness and security self-review. If the user requested a three-reviewer review, obtain approval before reducing or deferring it and record the decision in the report.
 - **Config/dependency-version bump with no behavior change**: smoke-test step may be skipped if CI already covers the affected path; state which CI job substitutes for it.
 
 When this skill runs, never skip: secrets/PII scan, and "one PR one concern" scope check — these apply regardless of change size or urgency.

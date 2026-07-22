@@ -58,11 +58,9 @@ Capture the user action, expected result, visible failure, forbidden behavior, c
 
 ## Verify the Final State
 
-- Scale review to risk: focused self-review for small changes; independent review for meaningful changes; subsystem and final review for credentials, migrations, concurrency, publishing, or production data.
 - After production changes, run a final-head gate: relevant and full tests, lint or type checks, production build, diff and secret scan, and prerequisite checks.
 - A later production or configuration change invalidates earlier build, deployment, and smoke evidence. Re-run affected checks.
 - When authorized, verify the deployed revision and safe runtime path. Record limitations instead of substituting tests for a blocked live check.
-- Do not repeat broad review after documentation-only or test-only follow-ups unless risk changed.
 
 ## Control Long-Running Session Cost
 
@@ -90,4 +88,4 @@ Use `complete` only for the highest verified level. Keep updates to current gate
 
 Return to Reality Preflight when reasoning becomes: "it worked before, so configuration exists"; "tests passed, so production works"; "deployed means the user flow works"; "the generic error probably comes from this layer"; or "review authorizes a fix or deployment."
 
-Use specialized engineering skills for implementation methods; this skill supplies collaboration, evidence, readiness, and external-side-effect gates.
+Use `pr-readiness` for completed-change handoff quality checks and specialized engineering skills for implementation methods. This skill supplies collaboration, evidence, readiness, and external-side-effect gates.
