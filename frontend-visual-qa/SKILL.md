@@ -1,5 +1,6 @@
 ---
 name: frontend-visual-qa
+disable-model-invocation: true
 description: Review or implement frontend UI/UX changes with visual QA. Use when Codex works on layout, responsive behavior, toolbars, buttons, modals, panels, forms, overflow/clipping, text fitting, overlap, drag/drop affordance, loading/download feedback, or any user-visible interface polish.
 ---
 

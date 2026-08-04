@@ -1,5 +1,6 @@
 ---
 name: collaborate-with-me
+disable-model-invocation: true
 description: Use when collaborating on planning, implementation, review, debugging, deployment, migrations, third-party integrations, credentials, production incidents, or work whose prerequisites, external side effects, real-versus-mock state, or verification status must be explicit.
 ---
 

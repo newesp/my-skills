@@ -1,5 +1,6 @@
 ---
 name: pr-readiness
+disable-model-invocation: true
 description: Use when a feature, module, or otherwise meaningful chunk of work is fully implemented and about to be handed off for human review — NOT after every small fix, one-line tweak, or intermediate push within an in-progress feature. Trigger on phrases like "這個功能做完了", "ready for review", "PR 準備好了", "before I open a PR", "before merging this feature", or when the agent itself is about to signal that a substantial piece of work is finished. Covers documentation updates, dead-code cleanup, build/lint/test verification, secrets/PII scanning, focused self-review, and an optional user-requested three-reviewer dispatch. Applies regardless of which user or project.
 ---
 
