@@ -1,0 +1,4 @@
+interface:
+  display_name: "Web Security Verification"
+  short_description: "Perform focused, non-destructive security verification of a web application or API."
+  default_prompt: "Use $web-security-verification to verify the web application against common vulnerabilities."
