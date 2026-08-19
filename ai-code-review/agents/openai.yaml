@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Code Review"
+  short_description: "Review code changes against Spec Compliance, Engineering Standards, and Defensive Security."
+  default_prompt: "Use $ai-code-review to review the changes between a fixed point and HEAD."
