@@ -1,89 +1,161 @@
 ---
 name: elementor-compatible-webpage
 description: >
-  Build HTML/CSS webpages that can be reliably converted into native,
-  editable WordPress Elementor pages. Use whenever the generated webpage
-  will later be imported into Elementor.
+  Build a webpage as both a browser-previewable HTML file and a native,
+  editable WordPress Elementor JSON template. Use whenever a page must be
+  previewed as HTML and later imported into Elementor.
 ---
 
-# Elementor-Compatible Webpage
+# Elementor Dual Output Page
 
-When creating or modifying a webpage, optimize for:
+## Goal
 
-1. Elementor editability
-2. Clean semantic HTML
-3. Responsive layout
-4. Visual quality
+For every webpage task, produce two equivalent outputs:
 
-The page must remain normal standalone HTML while being easy to convert into native Elementor widgets.
+1. `preview.html`
+   - standalone, browser-previewable
+   - responsive
+   - visually complete
 
----
+2. `elementor-template.json`
+   - native Elementor page/template JSON
+   - same structure, content, styles, and responsive behavior
+   - editable with Elementor Containers and Widgets
 
-## 1. Use Simple HTML + CSS
-
-Prefer:
-
-- HTML5
-- CSS
-- Flexbox
-- CSS variables
-- minimal vanilla JavaScript
-
-Do not introduce React, Vue, Tailwind, Canvas, WebGL, or complex runtime frameworks unless explicitly requested.
+Both outputs MUST represent the same page.
 
 ---
 
-## 2. Structure Every Major Section as a Container
+## Output Structure
 
-Use semantic sections:
+Preferred output:
 
-```html
-<section
-  data-el-type="container"
-  data-el-name="Hero"
->
-  ...
-</section>
+```text
+dist/
+├─ preview.html
+├─ elementor-template.json
+└─ assets/
+   ├─ ...
 ```
 
-Use nested containers only when they have a real layout or styling purpose.
-
-Avoid unnecessary wrapper nesting.
+If local images are used, include them under `assets/`.
 
 ---
 
-## 3. Explicitly Mark Elementor Widgets
+## Source of Truth
 
-Use these attributes whenever possible:
+Design the page once as a shared logical tree, then render that tree into both outputs.
+
+Example:
+
+```text
+Hero Container
+├─ Content Container
+│  ├─ Heading
+│  ├─ Text Editor
+│  └─ Button
+└─ Media Container
+   └─ Image
+```
+
+Do NOT independently design the HTML and JSON versions.
+
+---
+
+## Elementor JSON Envelope
+
+Generate this top-level shape:
+
+```json
+{
+  "content": [],
+  "page_settings": {},
+  "version": "0.4",
+  "title": "Page Title",
+  "type": "page"
+}
+```
+
+Use minimal Elementor-compatible data only.
+
+Do NOT copy unrelated plugin-specific settings from reference exports.
+
+---
+
+## Elementor Node Model
+
+### Container
+
+```json
+{
+  "id": "8-char-id",
+  "settings": {},
+  "elements": [],
+  "isInner": false,
+  "elType": "container"
+}
+```
+
+### Widget
+
+```json
+{
+  "id": "8-char-id",
+  "settings": {},
+  "elements": [],
+  "isInner": false,
+  "widgetType": "heading",
+  "elType": "widget"
+}
+```
+
+Generate unique 8-character lowercase hexadecimal IDs.
+
+---
+
+## Native Widget Mapping
+
+Use these native Elementor widget types:
+
+```text
+HTML / logical element      Elementor
+
+section/div layout       -> container
+h1-h6                    -> heading
+paragraph/rich text      -> text-editor
+a/button                 -> button
+img                      -> image
+```
+
+Prefer native widgets over HTML widgets.
+
+---
+
+## HTML Metadata
+
+In `preview.html`, mark conversion intent explicitly:
 
 ```html
+<section data-el-type="container" data-el-name="Hero">
+
 <h1 data-el-widget="heading">Title</h1>
 
-<p data-el-widget="text">
-  Description
-</p>
+<p data-el-widget="text-editor">Body text</p>
 
-<a
-  href="/contact"
-  data-el-widget="button"
->
-  Contact Us
-</a>
+<a href="/contact" data-el-widget="button">Contact</a>
 
-<img
-  src="images/hero.webp"
-  alt="..."
-  data-el-widget="image"
->
+<img src="assets/hero.webp"
+     alt="..."
+     data-el-widget="image">
 ```
 
-Supported metadata:
+Allowed metadata:
 
 ```text
 data-el-type="container"
 
 data-el-widget="heading"
-data-el-widget="text"
+data-el-widget="text-editor"
 data-el-widget="button"
 data-el-widget="image"
 
@@ -94,331 +166,435 @@ data-el-conversion="fallback"
 data-el-conversion="manual"
 ```
 
-Explicit `data-el-*` metadata should represent the intended Elementor component.
+Do not invent other `data-el-*` values.
 
 ---
 
-## 4. Use Semantic HTML
+## Heading Mapping
 
-Mapping contract:
-
-```text
-<section> / marked <div>
-    → Elementor Container
-
-<h1> ... <h6>
-    → Heading
-
-<p>
-    → Text Editor
-
-<img>
-    → Image
-
-<a data-el-widget="button">
-<button>
-    → Button
-```
-
-Do not create headings, buttons, or meaningful text from arbitrary nested `<div>` elements.
-
----
-
-## 5. Prefer Flexbox for Layout
-
-Use:
-
-```css
-display: flex;
-flex-direction: row;
-align-items: center;
-justify-content: space-between;
-gap: 32px;
-```
-
-Prefer Flexbox for:
-
-- columns
-- cards
-- navigation
-- hero layouts
-- feature layouts
-
-Avoid complex CSS Grid unless clearly necessary.
-
----
-
-## 6. Avoid Absolute Positioning for Main Content
-
-Do not position essential:
-
-- headings
-- text
-- buttons
-- images
-
-using absolute coordinates.
-
-Absolute positioning is acceptable for decorative elements only.
-
-Mark decoration:
+HTML:
 
 ```html
-<div
-  class="hero-glow"
-  data-el-role="decoration"
-></div>
+<h2 data-el-widget="heading">About Us</h2>
+```
+
+Elementor:
+
+```json
+{
+  "widgetType": "heading",
+  "settings": {
+    "title": "About Us",
+    "header_size": "h2"
+  }
+}
+```
+
+Map visual properties when present:
+
+```text
+color          -> title_color
+font-size      -> typography_font_size
+font-weight    -> typography_font_weight
+line-height    -> typography_line_height
+text-align     -> align
+```
+
+When typography settings are used, set:
+
+```json
+"typography_typography": "custom"
 ```
 
 ---
 
-## 7. Keep CSS Elementor-Friendly
+## Text Editor Mapping
 
-Prefer:
+HTML:
+
+```html
+<p data-el-widget="text-editor">
+  Build <strong>better products</strong>.
+</p>
+```
+
+Elementor:
+
+```json
+{
+  "widgetType": "text-editor",
+  "settings": {
+    "editor": "<p>Build <strong>better products</strong>.</p>"
+  }
+}
+```
+
+Map common styles:
+
+```text
+color       -> text_color
+font-size   -> typography_font_size
+line-height -> typography_line_height
+text-align  -> align
+```
+
+---
+
+## Button Mapping
+
+HTML:
+
+```html
+<a href="/contact" data-el-widget="button">
+  Get Started
+</a>
+```
+
+Elementor:
+
+```json
+{
+  "widgetType": "button",
+  "settings": {
+    "text": "Get Started",
+    "link": {
+      "url": "/contact",
+      "is_external": "",
+      "nofollow": "",
+      "custom_attributes": ""
+    }
+  }
+}
+```
+
+Map common button styles:
+
+```text
+color            -> button_text_color
+background-color -> background_color
+border-radius    -> border_radius
+padding          -> text_padding
+font-size        -> typography_font_size
+font-weight      -> typography_font_weight
+text-align       -> align
+```
+
+---
+
+## Image Mapping
+
+HTML:
+
+```html
+<img src="assets/hero.webp"
+     alt="Product interface"
+     data-el-widget="image">
+```
+
+Elementor target:
+
+```json
+{
+  "widgetType": "image",
+  "settings": {
+    "image": {
+      "id": 0,
+      "url": "{{ASSET:hero.webp}}",
+      "alt": "Product interface",
+      "source": "library",
+      "size": ""
+    }
+  }
+}
+```
+
+For local images, use:
+
+```text
+{{ASSET:filename}}
+```
+
+Do NOT invent WordPress attachment IDs.
+
+Do NOT use `file://`, machine-specific paths, or localhost URLs.
+
+A later importer may upload assets to the WordPress Media Library and replace the placeholder.
+
+---
+
+## Container / Flex Mapping
+
+Prefer Flexbox.
+
+HTML/CSS:
+
+```css
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+}
+```
+
+Map to Elementor:
+
+```text
+flex-direction  -> flex_direction
+justify-content -> flex_justify_content
+align-items     -> flex_align_items
+gap             -> flex_gap
+```
+
+Prefer these CSS properties because they map cleanly:
 
 ```text
 width
 max-width
 min-height
-
 margin
 padding
 gap
 
-background
+display
+flex-direction
+flex-wrap
+justify-content
+align-items
+
 background-color
 background-image
+background-position
+background-size
 
 color
-
 font-size
 font-weight
 line-height
+letter-spacing
 text-align
 
 border
 border-radius
 box-shadow
 
-display
+opacity
+object-fit
+```
+
+Avoid complex absolute positioning for important content.
+
+---
+
+## Elementor Dimension Shape
+
+For padding, margin, border radius, and similar four-side controls, use:
+
+```json
+{
+  "unit": "px",
+  "top": "24",
+  "right": "24",
+  "bottom": "24",
+  "left": "24",
+  "isLinked": true
+}
+```
+
+For scalar responsive controls, use:
+
+```json
+{
+  "unit": "px",
+  "size": 24,
+  "sizes": []
+}
+```
+
+Match units used by the HTML/CSS whenever practical.
+
+---
+
+## Responsive Mapping
+
+Support Desktop, Tablet, and Mobile.
+
+Use Elementor responsive suffixes:
+
+```text
+base setting
+*_tablet
+*_mobile
+```
+
+Examples:
+
+```text
+padding
+padding_tablet
+padding_mobile
+
+flex_direction
+flex_direction_tablet
+flex_direction_mobile
+
+width
+width_tablet
+width_mobile
+
+typography_font_size
+typography_font_size_tablet
+typography_font_size_mobile
+
+align
+align_tablet
+align_mobile
+```
+
+The HTML media queries and Elementor responsive settings MUST express equivalent behavior.
+
+Prefer responsive changes in:
+
+```text
 flex-direction
-justify-content
-align-items
+width
+gap
+padding
+margin
+font-size
+line-height
+alignment
 ```
 
-Avoid relying on:
-
-- complex pseudo-elements
-- clip-path for essential content
-- CSS masks
-- advanced transforms
-- experimental CSS
-- deeply coupled selectors
-
-Pseudo-elements may be used for decoration only.
+Do not create separate desktop/mobile DOM trees unless necessary.
 
 ---
 
-## 8. Keep Assets Portable
+## Layout Rules
 
-Use project-relative paths:
+MUST:
 
-```text
-images/hero.webp
-images/logo.svg
-```
+- use semantic HTML
+- use meaningful Containers
+- prefer Flexbox
+- keep wrapper nesting shallow
+- keep essential content editable
+- keep assets portable
+- render correctly without JavaScript
 
-Never use:
+MUST NOT:
 
-```text
-file://
-C:\...
-/Users/...
-localhost/... absolute asset paths
-```
-
-All required assets must exist inside the project.
-
----
-
-## 9. Keep JavaScript Optional
-
-The basic page content and layout must render correctly without JavaScript.
-
-JavaScript may be used for simple interactions such as:
-
-- mobile menu
-- accordion
-- tabs
-- optional animation
-
-Do not dynamically generate essential page content with JavaScript.
+- use React/Vue for ordinary landing pages
+- use Canvas/WebGL for ordinary UI
+- rely on complex absolute positioning
+- put meaningful content in pseudo-elements
+- generate essential content at runtime with JavaScript
+- wrap the whole page in one HTML widget
+- copy plugin-specific Elementor settings unless explicitly required
 
 ---
 
-## 10. Responsive Requirements
+## Unsupported Components
 
-Support:
-
-```text
-Desktop
-Tablet
-Mobile
-```
-
-Prefer responsive changes involving:
-
-- flex-direction
-- width
-- gap
-- padding
-- font-size
-- alignment
-
-Avoid maintaining completely separate desktop and mobile DOM trees.
-
----
-
-## 11. Unsupported Components
-
-If something cannot reliably become native Elementor content, mark it explicitly:
+For components that cannot cleanly map to native Elementor:
 
 ```html
-<div
-  data-el-conversion="fallback"
->
-  ...
-</div>
+<div data-el-conversion="fallback">
 ```
 
 or:
 
 ```html
-<div
-  data-el-conversion="manual"
->
-  ...
-</div>
+<div data-el-conversion="manual">
 ```
 
 Examples:
 
-- carousel
+- complex carousel
 - complex forms
-- WebGL
-- complex JavaScript widgets
+- Canvas/WebGL
+- third-party JS widgets
 - highly custom animation
 
-Do not compromise the rest of the page because one component is unsupported.
+Keep unsupported components isolated.
 
 ---
 
-# Preferred Example
+## Decoration
+
+Decorative-only elements may use advanced CSS:
 
 ```html
-<section
-  class="hero"
-  data-el-type="container"
-  data-el-name="Hero"
->
-
-  <div
-    class="hero-inner"
-    data-el-type="container"
-  >
-
-    <div
-      class="hero-content"
-      data-el-type="container"
-    >
-
-      <h1 data-el-widget="heading">
-        Build Better Products
-      </h1>
-
-      <p data-el-widget="text">
-        Turn ideas into production-ready products.
-      </p>
-
-      <a
-        href="/contact"
-        data-el-widget="button"
-      >
-        Get Started
-      </a>
-
-    </div>
-
-    <div
-      class="hero-media"
-      data-el-type="container"
-    >
-
-      <img
-        src="images/hero.webp"
-        alt="Product interface"
-        data-el-widget="image"
-      >
-
-    </div>
-
-  </div>
-
-</section>
+<div class="glow" data-el-role="decoration"></div>
 ```
 
-Preferred layout:
-
-```css
-.hero-inner {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 48px;
-}
-
-.hero-content,
-.hero-media {
-  width: 50%;
-}
-
-@media (max-width: 767px) {
-  .hero-inner {
-    flex-direction: column;
-  }
-
-  .hero-content,
-  .hero-media {
-    width: 100%;
-  }
-}
-```
+Loss of decorative elements must not destroy meaning or editability.
 
 ---
 
-# Before Finishing
+## Consistency Requirement
 
-Verify:
+Before finishing, compare both outputs.
 
-- [ ] Major sections use `data-el-type="container"`
-- [ ] Headings use semantic `<h1>`–`<h6>`
-- [ ] Editable text uses `<p>`
-- [ ] Buttons use `<a>` or `<button>`
-- [ ] Images use normal `<img>`
-- [ ] Important widgets include `data-el-widget`
-- [ ] Main layout uses Flexbox
-- [ ] Essential content does not depend on absolute positioning
-- [ ] Assets use portable relative paths
-- [ ] Basic content works without JavaScript
-- [ ] Mobile layout works
-- [ ] Unsupported components are explicitly marked
+They MUST match on:
+
+- section order
+- text content
+- links
+- images
+- container hierarchy
+- spacing
+- typography
+- colors
+- desktop layout
+- tablet layout
+- mobile layout
+
+If one output changes, update the other.
+
+---
+
+## Validation
+
+Before completion, verify:
+
+- [ ] `preview.html` opens directly in a browser
+- [ ] `elementor-template.json` is valid JSON
+- [ ] top-level JSON contains `content`, `page_settings`, `version`, `title`, `type`
+- [ ] every node has a unique `id`
+- [ ] Containers use `elType: "container"`
+- [ ] Widgets use `elType: "widget"`
+- [ ] native widgets use `heading`, `text-editor`, `button`, or `image`
+- [ ] Container hierarchy matches the HTML structure
+- [ ] responsive HTML and Elementor settings match
+- [ ] local images use `{{ASSET:...}}`
+- [ ] no fake WordPress attachment IDs are generated
+- [ ] no unnecessary plugin-specific settings are copied
+- [ ] unsupported components are explicitly marked
 
 Target:
 
 ```text
 >= 90% native Elementor editable coverage
 ```
+
+---
+
+## Final Agent Response
+
+When finished, report only:
+
+```text
+Created:
+- dist/preview.html
+- dist/elementor-template.json
+- dist/assets/...
+
+Elementor compatibility:
+- Native editable coverage: XX%
+- Fallback/manual components: ...
+- Asset placeholders: ...
+```
+
+Do not merely describe the page. Create both outputs.
