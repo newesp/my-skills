@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "HTML to Next.js"
+  short_description: "Convert native HTML pages into Next.js components and design system."
+  default_prompt: "Use $html-to-next to convert the HTML pages in temp/ to Next.js."

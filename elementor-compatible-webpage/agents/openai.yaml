@@ -1,0 +1,4 @@
+﻿interface:
+  display_name: "Elementor-Compatible Webpage"
+  short_description: "Build HTML/CSS webpages that can be reliably converted into native WordPress Elementor pages."
+  default_prompt: "Use $elementor-compatible-webpage to build or optimize a webpage for WordPress Elementor compatibility."
