@@ -1,4 +1,4 @@
 interface:
   display_name: "Frontend Visual QA"
-  short_description: "Check UI layout, fit, overlap, and affordance."
-  default_prompt: "Use $frontend-visual-qa to review this frontend UI change before implementation and completion."
+  short_description: "Reuse UI patterns and verify real tasks, states, and layout."
+  default_prompt: "Use $frontend-visual-qa before implementation to establish the existing interaction baseline and task acceptance, then verify the actual desktop/mobile workflow with representative content before completion."
