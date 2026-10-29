@@ -24,6 +24,7 @@ Use this skill before implementation and again before declaring a frontend chang
 - Use representative content volume, long titles/body text, relationships, and version history—not only one short item. State the chosen volume and why it exercises the likely pressure points.
 - For collection editors, use a list plus a focused editor or an established equivalent. Separate different content types into workspaces when their tasks differ. Provide search/filtering when the expected volume makes scanning impractical.
 - On narrow screens, provide an explicit list/detail path, return navigation, and retained selection/input/scroll context. A page without horizontal overflow can still be unusably long.
+- Arrange each task in a clear visual and interaction sequence: top to bottom, and left to right or right to left according to the language and task. Place prerequisites before dependent actions, and make the next step clear where the user needs it. Apply this to forms, navigation, and action placement without forcing unrelated tasks into one sequence.
 - Follow the task order in the form: primary content first, relationships next, management metadata later. Explain missing prerequisites where the user encounters them.
 
 **Gate:** Define observable desktop and mobile task outcomes before implementation, including how the user finds, edits, saves, and recovers from errors.
