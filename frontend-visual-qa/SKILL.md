@@ -1,6 +1,6 @@
 ---
 name: frontend-visual-qa
-description: Design, implement, or review user-visible frontend changes. Use before building admin editors or multi-step forms, when matching an existing UI pattern, and for responsive layout, overflow, interaction feedback, or visual regression work.
+description: Design, implement, or review user-visible frontend changes. Use before building admin editors or multi-step forms, when matching an existing UI pattern or simplifying multi-window workflows, and for responsive layout, overflow, interaction feedback, or visual regression work.
 ---
 
 # Frontend Visual QA
@@ -15,6 +15,7 @@ Use this skill before implementation and again before declaring a frontend chang
 - Inspect the closest existing working surface in the project, including its actual interactions. Record the patterns to reuse and explain material deviations. If none exists, choose a conservative baseline and state that limitation.
 - Reuse established controls and behavior where contracts match. Keep domain-specific editors distinct; reuse is not a reason to impose another feature's fixed fields or build a generic editor framework.
 - For an assessment-only request, inspect and recommend without changing product code or live data.
+- When consolidating steps, editors, or windows, apply [workflow consolidation](#workflow-consolidation) before choosing the layout.
 
 **Gate:** Name the reference surface, reusable patterns, task sequence, and intentional differences before editing. For a defect, reproduce it and state the cause before choosing the fix.
 
@@ -41,7 +42,7 @@ Use this skill before implementation and again before declaring a frontend chang
 
 ### 4. Exercise the actual surface
 
-Use an available browser tool for non-trivial frontend implementation or UX assessment. Run the relevant application and inspect screenshots as well as interactions; tests, source inspection, and screenshots alone are insufficient.
+For non-trivial implementation or runtime UX assessment, exercise the actual platform: browser tools for web surfaces, native application tools for desktop surfaces. Inspect screenshots as well as interactions; tests, source inspection, and screenshots alone are insufficient. For design-only work, inspect the mockups and label runtime acceptance as pending implementation.
 
 - Use an isolated environment and representative fixtures; keep production content and publication untouched unless explicitly authorized.
 - Complete the primary task at desktop and narrow/mobile widths. Exercise applicable search, selection, editing, relationships, preview, save, publication, error correction, and return navigation.
@@ -50,6 +51,20 @@ Use an available browser tool for non-trivial frontend implementation or UX asse
 - Fix failures and repeat the affected scenario. Keep regression tests for plausible data-loss or state-transition bugs; use browser evidence for visual/task usability.
 
 **Gate:** Each affected acceptance item below has observed evidence. If runtime access is unavailable, finish static assessment, state exactly what could not be exercised, and label runtime acceptance as unverified rather than complete. Close only owned tabs and stop only owned fixtures.
+
+## Workflow Consolidation
+
+Apply when users ask for fewer steps, buttons, windows, or repeated editing/confirmation screens:
+
+- **Map the task before counting controls.** Identify which screens edit the same content, which merely repeat it, and which represent genuinely different tasks or irreversible actions. Merge repeated editing and confirmation into one workspace where the data contract allows it; retain distinct tasks where the user needs a meaningful decision.
+- **Keep one stable editor.** Manual editing, automated suggestions, review, and saving should share the editor when they operate on the same document. Change content, difference markers, progress, and available actions rather than rebuilding the layout after processing. Preserve selection, input, scroll context, and the user's source-pane visibility/width. On narrower viewports, offer an explicit pane switch and restore the preferred layout when space returns.
+- **Disclose tools in place.** Keep frequent task actions visible. Put occasional search, history, settings, or source controls behind a clearly named entry point. Show search near the editor and secondary tools in a bounded, collapsible region; preserve useful editing space and reachable primary actions. Explain where each tool opens, how it closes, and what state survives. Choose the pane direction for the product rather than imposing a universal bottom drawer. Avoid outer-page scrolling around independently scrolling editors.
+- **Separate user decisions from background mechanics.** A whole-document operation can batch internally without requiring the user to approve each batch. Provide overall progress, cancellation, and recovery for incomplete work; preserve individual review where useful. Clearly distinguish completed, partial, failed, and cancelled results, and disable conflicting actions while busy.
+- **Make fewer controls carry clear meaning.** Remove repeated summaries, obvious explanations, and options that do not change a meaningful choice. Prefer a precise action label over an extra routine confirmation. Preserve required consent and approval contracts unless the user explicitly changes them; a preference in one project is not permission to remove consent elsewhere. Show controls that apply to the selected source, service, and work state.
+- **Keep persistence explicit.** Distinguish temporary drafts, automated candidates, saved versions, and approved production snapshots even when they share one editor. Combine apply/save/confirm only when authorized, with a clear label and consistent commit semantics. Save failure retains input and cannot report readiness or advance the workflow. Reject stale results, preserve recoverable versions before restore/reload, and invalidate downstream readiness when content changes.
+- **Make designs reviewable.** When mockups are requested or project rules require approval, show the same workspace in the important states, including expanded secondary tools. Record what changes, what stays in place, and the effect of the primary action. Reuse existing approval for the agreed scope. When maintaining specs or tickets is in scope, update the authoritative rules and identify superseded behavior so implementation follows the accepted design.
+
+**Acceptance:** Exercise the full task without redundant editor or confirmation screens; open and close each affected tool; run a meaningful failure/recovery path; verify input and layout continuity. State exactly which approval, save, and downstream invalidation rules remain. Write acceptance paths as short actions with observable results, for example: “Open history → Select a version → Verify a read-only preview → Restore → Verify the current draft was backed up.”
 
 ## Editor Safeguards
 
