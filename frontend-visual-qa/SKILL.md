@@ -1,105 +1,69 @@
 ---
 name: frontend-visual-qa
-description: Design, implement, or review user-visible frontend changes. Use before building admin editors or multi-step forms, when matching an existing UI pattern or simplifying multi-window workflows, and for responsive layout, overflow, interaction feedback, or visual regression work.
+description: Design, implement, or review user-visible web or desktop UI. Use for editor and workflow consistency, fewer steps or windows, responsive layout, scrolling, interaction feedback, and visual regression work.
 ---
 
 # Frontend Visual QA
 
-Use this skill before implementation and again before declaring a frontend change complete. Passing tests and fitting the viewport prove neither task usability nor consistency. Carry established UX decisions into the first delivery; new requirements or observed usage can still justify later changes.
+Prioritize fluent tasks, intuitive operation, and consistent UI. Reduce unnecessary buttons, windows, and steps while keeping useful actions discoverable. Fewer visible controls are not an improvement if they add searching or clicks.
 
 ## Workflow
 
-### 1. Establish the interaction baseline
+1. **Establish the baseline.** Identify the task, affected components, parent layout, and closest working reference surface. Inspect its interactions; name patterns to reuse and intentional differences. For defects, reproduce the problem and investigate the cause. Assessment-only requests produce recommendations without product changes.
+2. **Define acceptance.** Use representative content and applicable empty, processing, edited, disabled, failed, partial, cancelled, and successful states. Include target viewport sizes and adverse transitions. Write short actions with observable outcomes, such as “Open history → Select a version → Verify the current input is unchanged.”
+3. **Design the structure.** Apply the rules below. Inspect dimensions, shrink/wrap behavior, overflow, positioning, focus, and event routing. Fix parent layout constraints rather than special-casing one label. Shorten wording when it is redundant, not to conceal clipping.
+4. **Verify the actual surface.** Use browser tools for web UI and native tools for desktop UI. Complete the task with representative data at normal and reduced sizes; exercise keyboard and other supported input methods. Inspect screenshots and interactions. Fix failures and repeat affected scenarios. Tests or a fitting screenshot alone do not establish usability.
 
-- Identify the affected component/file, user task, and parent layout: flex, grid, modal, pane, or scroll container.
-- Inspect the closest existing working surface in the project, including its actual interactions. Record the patterns to reuse and explain material deviations. If none exists, choose a conservative baseline and state that limitation.
-- Reuse established controls and behavior where contracts match. Keep domain-specific editors distinct; reuse is not a reason to impose another feature's fixed fields or build a generic editor framework.
-- For an assessment-only request, inspect and recommend without changing product code or live data.
-- When consolidating steps, editors, or windows, apply [workflow consolidation](#workflow-consolidation) before choosing the layout.
+When mockups are requested or project rules require approval, show important states and expanded tools before implementation. Reuse approval for the agreed scope. For design-only work, inspect the mockups and mark runtime acceptance as pending. If runtime access is unavailable, report the specific unverified paths.
 
-**Gate:** Name the reference surface, reusable patterns, task sequence, and intentional differences before editing. For a defect, reproduce it and state the cause before choosing the fix.
+## Task and Interface Consistency
 
-### 2. Define acceptance around tasks and content scale
+- Arrange prerequisites and actions in task order, using the reading direction of the interface. Make the next action evident. Keep genuinely different tasks distinct; shared components need not force unrelated data into one editor.
+- For consecutive operations on the same content, prefer one stable workspace. Import, edit, automated assistance, review, and save can update content and state without opening duplicate editors or confirmation pages. Preserve input, selection, scroll context, and user-adjusted pane visibility/size across transitions.
+- Expose frequent actions directly. Put occasional tools behind a named entry point and expand them in the current workspace where practical. Specify how each tool opens, closes, and retains state. Choose side panels, inline bars, tabs, or other layouts for the task; no single arrangement fits every project.
+- Allocate space to primary content. Use focused list/detail views and search/filtering when collection size warrants them. At reduced sizes, reflow, collapse secondary tools, or offer explicit pane navigation with retained context.
+- Let background work batch internally without requiring users to repeat an action per batch. Offer whole-item operations and optional individual review when appropriate.
 
-- Cover initial/empty, loading, populated, edited/unsaved, disabled, validation failure, request failure, and success states that apply.
-- Use representative content volume, long titles/body text, relationships, and version history—not only one short item. State the chosen volume and why it exercises the likely pressure points.
-- For collection editors, use a list plus a focused editor or an established equivalent. Separate different content types into workspaces when their tasks differ. Provide search/filtering when the expected volume makes scanning impractical.
-- On narrow screens, provide an explicit list/detail path, return navigation, and retained selection/input/scroll context. A page without horizontal overflow can still be unusably long.
-- Arrange each task in a clear visual and interaction sequence: top to bottom, and left to right or right to left according to the language and task. Place prerequisites before dependent actions, and make the next step clear where the user needs it. Apply this to forms, navigation, and action placement without forcing unrelated tasks into one sequence.
-- Follow the task order in the form: primary content first, relationships next, management metadata later. Explain missing prerequisites where the user encounters them.
+Example: import text → edit in the same workspace → run full-text assistance → review changes there → save for downstream use. An additional page that merely repeats the saved text adds no useful decision.
 
-**Gate:** Define observable desktop and mobile task outcomes before implementation, including how the user finds, edits, saves, and recovers from errors.
+## Scrolling and Content Reachability
 
-### 3. Fix the structure while preserving contracts
+- Assign each overflow region a scroll owner and direction before implementation. In editor workspaces, keep navigation, toolbars, and primary actions stable; scroll long text, lists, tables, or previews within their content regions. Ordinary document pages and long forms may legitimately use page scrolling.
+- Give scrollable content usable, bounded space. Avoid a same-axis outer workspace scroller competing with an inner editor by default. Where nesting is necessary, define behavior at scroll boundaries so users can reach both regions without accidental jumps or traps.
+- Overflowing text must remain readable through its final line. Provide platform-appropriate scroll affordances; hiding a scrollbar or clipping overflow is not a layout fix. Prefer wrapping prose. Allow horizontal scrolling only for content that needs it, such as wide tables or code.
+- Route wheel/touch input to the intended region and keyboard scrolling to the focused control. Global handlers must not steal scrolling from text areas. Fixed controls must not cover content or focused fields.
+- Verify with content several times taller than the viewport: scroll to both ends using supported wheel/touch, scrollbar, and keyboard interactions; confirm only the intended region moves and primary actions remain reachable. Repeat after resizing and expanding tools. A visible scrollbar is not evidence that scrolling works.
 
-- For visual defects, inspect width constraints, `min-width`, `max-width`, shrink/wrap rules, grid tracks, overflow, positioning, z-index, line height, padding, and content length. State a concrete hypothesis.
-- Prefer container-level fixes: grid tracks for a known fixed control count; explicit flex shrink/wrap for variable controls; menus or disclosure when needed. Shorten labels only when wording is the actual cause, not to hide a layout defect.
-- Preserve permissions, data ownership, validation, versioning, approval invalidation, safety masking, and explicit save/publish semantics. UI simplification must not silently introduce autosave, automatic publication, or a new data model.
-- Preserve keyboard, focus, modal, disabled, and tooltip behavior; retain icon plus text when required by the product style.
-- For editorial, relationship, or versioned forms, apply the [editor safeguards](#editor-safeguards).
+## Necessary Feedback, Minimal Noise
 
-**Gate:** The chosen structure handles the representative content and known states without special-casing one label or dropping a product rule.
+Show information when it explains the current state, the result, a meaningful consequence, or an actionable next step.
 
-### 4. Exercise the actual surface
+- **Processing:** acknowledge the action promptly with a busy indicator or status. Prevent duplicate/conflicting actions. Show real progress when available and cancellation when supported.
+- **Completion:** provide perceptible success, partial, cancelled, or failed feedback. A clearly updated result or inline status may suffice; routine success need not open a blocking alert. Make failures actionable and retain relevant input. Place field errors near the problem; use a navigable summary when errors span hidden regions.
+- **Decisions:** explain unexpected consequences before committing them. Keep required consent and approval according to the project contract and explicit user instructions.
+- **Noise:** omit repeated summaries, technical identifiers, obvious explanations, and options with no meaningful effect. Move details to an on-demand view. For example, an explicit AI proofreading action usually needs no adjacent “text will be sent to AI” reminder unless the actual scope or consent requirement warrants it.
+- Show fields and actions applicable to the selected service, source type, and work state. Explain blocked actions where users can resolve the prerequisite.
 
-For non-trivial implementation or runtime UX assessment, exercise the actual platform: browser tools for web surfaces, native application tools for desktop surfaces. Inspect screenshots as well as interactions; tests, source inspection, and screenshots alone are insufficient. For design-only work, inspect the mockups and label runtime acceptance as pending implementation.
+## Project-Specific Data Contracts
 
-- Use an isolated environment and representative fixtures; keep production content and publication untouched unless explicitly authorized.
-- Complete the primary task at desktop and narrow/mobile widths. Exercise applicable search, selection, editing, relationships, preview, save, publication, error correction, and return navigation.
-- Check a meaningful adverse transition: for example, change versions with unsaved input, switch a relationship to one with no eligible content, or correct a validation error hidden in another editor.
-- Verify keyboard focus and reachable controls, not merely DOM presence. Capture the relevant content, not only the page heading.
-- Fix failures and repeat the affected scenario. Keep regression tests for plausible data-loss or state-transition bugs; use browser evidence for visual/task usability.
+Use the project's existing save, permissions, validation, and recovery rules. Do not introduce version history, approval workflows, autosave, or production snapshots merely to simplify UI.
 
-**Gate:** Each affected acceptance item below has observed evidence. If runtime access is unavailable, finish static assessment, state exactly what could not be exercised, and label runtime acceptance as unverified rather than complete. Close only owned tabs and stop only owned fixtures.
+- Label the scope and effect of save/apply/publish. Combine actions only when the intended workflow permits it, with consistent commit behavior. Failure cannot report success or advance to a ready state.
+- Preserve input across navigation and failures. Before reload, replacement, or reauthentication would discard edits, use the project's retention mechanism or obtain an explicit discard decision. Keep destructive actions distinct from routine actions.
+- Where versions or approvals exist, distinguish editing, preview, saved, and approved states; apply the project's invalidation rules after changes. Reject stale asynchronous results that would overwrite newer input.
+- Where relationships exist, offer eligible choices with meaningful names/status; explain empty choices and consequences of clearing dependent selections. Returning from related-content editing preserves the original input.
+- Where preview exists, preview current input without publishing it or bypassing permissions. Store sensitive drafts and credentials only through approved project mechanisms.
 
-## Workflow Consolidation
+## Completion Evidence
 
-Apply when users ask for fewer steps, buttons, windows, or repeated editing/confirmation screens:
+For each affected rule, record observed evidence or the unverified condition:
 
-- **Map the task before counting controls.** Identify which screens edit the same content, which merely repeat it, and which represent genuinely different tasks or irreversible actions. Merge repeated editing and confirmation into one workspace where the data contract allows it; retain distinct tasks where the user needs a meaningful decision.
-- **Keep one stable editor.** Manual editing, automated suggestions, review, and saving should share the editor when they operate on the same document. Change content, difference markers, progress, and available actions rather than rebuilding the layout after processing. Preserve selection, input, scroll context, and the user's source-pane visibility/width. On narrower viewports, offer an explicit pane switch and restore the preferred layout when space returns.
-- **Disclose tools in place.** Keep frequent task actions visible. Put occasional search, history, settings, or source controls behind a clearly named entry point. Show search near the editor and secondary tools in a bounded, collapsible region; preserve useful editing space and reachable primary actions. Explain where each tool opens, how it closes, and what state survives. Choose the pane direction for the product rather than imposing a universal bottom drawer. Avoid outer-page scrolling around independently scrolling editors.
-- **Separate user decisions from background mechanics.** A whole-document operation can batch internally without requiring the user to approve each batch. Provide overall progress, cancellation, and recovery for incomplete work; preserve individual review where useful. Clearly distinguish completed, partial, failed, and cancelled results, and disable conflicting actions while busy.
-- **Make fewer controls carry clear meaning.** Remove repeated summaries, obvious explanations, and options that do not change a meaningful choice. Prefer a precise action label over an extra routine confirmation. Preserve required consent and approval contracts unless the user explicitly changes them; a preference in one project is not permission to remove consent elsewhere. Show controls that apply to the selected source, service, and work state.
-- **Keep persistence explicit.** Distinguish temporary drafts, automated candidates, saved versions, and approved production snapshots even when they share one editor. Combine apply/save/confirm only when authorized, with a clear label and consistent commit semantics. Save failure retains input and cannot report readiness or advance the workflow. Reject stale results, preserve recoverable versions before restore/reload, and invalidate downstream readiness when content changes.
-- **Make designs reviewable.** When mockups are requested or project rules require approval, show the same workspace in the important states, including expanded secondary tools. Record what changes, what stays in place, and the effect of the primary action. Reuse existing approval for the agreed scope. When maintaining specs or tickets is in scope, update the authoritative rules and identify superseded behavior so implementation follows the accepted design.
+- Complete the primary task and open/close affected tools; verify consistent placement, retained context, and clear action scope.
+- Exercise long-content scrolling as specified above, plus reduced viewport and expanded-panel states. Confirm readable labels, no overlap/clipping, and reachable focus/actions.
+- Exercise one meaningful adverse transition, such as a request failure or navigation with unsaved input; verify feedback and applicable data contracts.
 
-**Acceptance:** Exercise the full task without redundant editor or confirmation screens; open and close each affected tool; run a meaningful failure/recovery path; verify input and layout continuity. State exactly which approval, save, and downstream invalidation rules remain. Write acceptance paths as short actions with observable results, for example: “Open history → Select a version → Verify a read-only preview → Restore → Verify the current draft was backed up.”
+Use isolated fixtures; change production content only when authorized. Retain regression tests for plausible state or data-loss bugs and actual-surface evidence for layout and interaction. Close only owned tabs and stop only owned test processes.
 
-## Editor Safeguards
+When spec/ticket maintenance is in scope, update the authoritative rules and identify superseded behavior. Consolidate recurring lessons into existing guidance rather than parallel copies.
 
-Apply these when the surface edits collections, relationships, drafts, or published content:
-
-- **State and scope:** Distinguish the loaded/editing version, current published version, unsaved changes, and pending approval. Label whether save/publish applies to one item or the whole edition; editing one visible item must not imply single-item persistence.
-- **Action reachability:** Keep the primary save action easy to find without traversing unrelated records. Sticky controls are optional; if used, ensure they do not cover focused fields or content on small screens.
-- **Input protection:** Switching items or workspaces preserves unsaved input. Switching/reloading versions or leaving the editor requires explicit discard confirmation when input would be lost. Remove destructive actions from the primary action hierarchy; show affected references before removal or disabling.
-- **Relationships:** Show eligible choices with meaningful names and status. Explain an empty choice list and offer the next step. Warn before a relationship change clears existing selections; provide a return path from related-content editing that retains the original input.
-- **Error recovery:** Put useful errors beside fields and provide a summary that opens the relevant item and focuses the problem. Preserve input after failures; a disabled publish button needs an actionable explanation.
-- **Preview and approval:** For reader-facing content, preview current unsaved input without publishing or bypassing permissions/safety. Clearly label draft preview. Keep professional/editorial confirmation separate from mere format validity.
-- **Reauthentication:** When fresh login is required, explain how pending edits will be retained or require an explicit choice before a navigation that discards them. Do not persist sensitive drafts in browser storage without an approved policy.
-
-## UI Acceptance Checklist
-
-For every changed surface, mark each applicable item with observed evidence; explain any non-applicable item:
-
-- No horizontal clipping, overlapping text, or controls hidden by overflow; labels fit the target container. Intentionally shortened labels remain understandable and have an accessible full name or explanation.
-- The established interaction baseline is retained, or deviations have a task-based justification.
-- Representative content can be found and edited without scrolling through unrelated full forms.
-- Empty, loading, disabled, failure, success, and unsaved states explain what happened and what to do next.
-- Save/publish scope and current version/state are clear; primary and destructive actions are distinct.
-- Applicable editor safeguards survive actual state transitions, including recovery and unsaved-input protection.
-- Keyboard and mobile users can complete the same task, with predictable focus and return navigation.
-- The fix addresses the layout or interaction structure, not just one screenshot.
-
-## Preventing Repeated UX Rework
-
-Treat previously accepted interaction patterns as a baseline, not optional polish. When a recurring defect exposes a missing rule, update the existing authoritative design guidance/checklist and the reusable behavior where appropriate; avoid parallel copies of the same rule. A behavior fix earns a regression check, while visual consistency earns an actual-surface comparison. Promise adherence to this process and its evidence, not that future product changes will never require redesign.
-
-## Reporting
-
-In the final response, include:
-
-- The reference pattern and observed usability issue or visual root cause.
-- The structural change made, or the prioritized recommendation for assessment-only work.
-- The exercised tasks, content volume, viewports, and relevant verification command/browser evidence.
-- Any unverified state, intentional deviation, or residual manual QA risk. Do not claim general UX completion from tests or a no-overflow check alone.
+Report the baseline or root cause, change or recommendation, exercised tasks/content sizes/viewports, and remaining verification gaps. Do not claim runtime completion from static mockups or tests alone.
